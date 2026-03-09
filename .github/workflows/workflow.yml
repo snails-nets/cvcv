@@ -1,0 +1,48 @@
+name: workflow
+
+on:
+  push:
+    branches: ["main"]
+
+  workflow_dispatch:
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v5
+
+      - name: setup
+        uses: pnpm/action-setup@v4
+
+      - name: install
+        run: pnpm i
+
+      - name: build
+        run: pnpm b
+
+      - name: upload
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist
+
+  deploy:
+    name: deploy
+    needs: build
+    permissions:
+      pages: write
+      id-token: write
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploying.outputs.page_url }}
+    steps:
+      - name: deploy
+        id: deploying
+        uses: actions/deploy-pages@v4
