@@ -17,13 +17,16 @@ export type Join<T extends List<string>> = T extends [
 export const Alphabet = "abcdefghijklmnopqrstuvwxyz" as const;
 export type Alphabetic = Split<typeof Alphabet>;
 
-/**
- * @param N `0` and `1` are alike in yield
- */
-export type Repeat<S extends string, N extends number> = S extends any
+export type Repeat<
+  S extends string,
+  N extends number,
+  C extends string = "",
+> = S extends any
   ? N extends 0
     ? ""
-    : `${S}${Repeat<S, Before<N>>}`
+    : N extends 1
+      ? S
+      : `${S}${C}${Repeat<S, Before<N>, C>}`
   : never;
 
 export const repeat = <S extends string, N extends number>(s: S, n: N) => {

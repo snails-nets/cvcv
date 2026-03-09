@@ -1,6 +1,6 @@
-import { makeBreath, makeBabble, type Babble } from "../babble";
-import { makeByspell } from "../byspell";
-import { book, shoal } from "../loud";
+import { makeBabbles, type Babbles } from "../speech/babble";
+import { makeByspell } from "../speech/byspell";
+import type { Maybe } from "../type/type";
 import { makeHtmlElement, type Elementful, type Wakesome } from "./dom";
 import { type WaystringSettings, makeShapeSvg } from "./svg";
 
@@ -15,6 +15,12 @@ type ShapesDiv = Elementful<"div"> & {
   left: ShapeDiv;
   right: ShapeDiv;
 };
+
+type ShapeDiv = Elementful<"div"> &
+  Wakesome & {
+    nameSpan: HTMLSpanElement;
+    shapeSvg: SVGSVGElement;
+  };
 
 type ButtonsUl = Elementful<"ul"> & {
   resetLi: HTMLLIElement;
@@ -32,6 +38,7 @@ type BabbleLi = Elementful<"li"> &
     babbleSpan: HTMLSpanElement;
     louds: LoudsDiv;
     byspellsUl: HTMLUListElement;
+    babbles: Babbles;
   };
 
 type LoudsDiv = Elementful<"div"> & {
@@ -52,6 +59,8 @@ export const become = (): WorldDiv => {
   worldDiv.buttons.resetLi.onclick = () => unset(worldDiv);
   worldDiv.buttons.submitLi.onclick = () => send(worldDiv);
   worldDiv.buttons.skipLi.onclick = () => wherve(worldDiv);
+
+  addListeners(worldDiv);
 
   return worldDiv;
 };
@@ -75,7 +84,10 @@ const send = (worldDiv: WorldDiv) => {
 export const wherve = (worldDiv: WorldDiv) => {
   updateShapes(worldDiv);
   updateBabbles(worldDiv);
+  addListeners(worldDiv);
+};
 
+const addListeners = (worldDiv: WorldDiv) => {
   addListener(worldDiv, worldDiv.shapes.left, [worldDiv.shapes.right]);
   addListener(worldDiv, worldDiv.shapes.right, [worldDiv.shapes.left]);
   addListener(worldDiv, worldDiv.babbles.top, [worldDiv.babbles.bottom]);
@@ -107,28 +119,27 @@ const makeBabblesUl = (): BabblesUl => {
   const element = makeHtmlElement("ul", { id: "babbles" });
 
   const top = makeBabbleLi();
-  const bottom = makeBabbleLi();
+  const bottom = makeBabbleLi(top.babbles);
   element.append(top.element, bottom.element);
 
   return { element, top, bottom };
 };
 
-const makeBabbleLi = (): BabbleLi => {
-  const breath = makeBreath();
-  const babble = makeBabble(breath.choke, breath.bear);
+const makeBabbleLi = (forbiddens: Maybe<Babbles> = undefined): BabbleLi => {
+  const babbles = makeBabbles(forbiddens);
 
   const element = makeHtmlElement("li");
 
   const babbleSpan = makeHtmlElement("span", {
     classes: ["babble"],
-    innerHTML: book(babble),
+    innerHTML: babbles.book,
   });
 
-  const louds = makeLoudsDiv(babble);
+  const louds = makeLoudsDiv(babbles);
 
   const byspellsUl = makeHtmlElement("ul");
   byspellsUl.append(
-    ...[breath.choke, breath.bear].map((staff) => {
+    ...[babbles.choke, babbles.bear].map((staff) => {
       const li = makeHtmlElement("li", { innerHTML: makeByspell(staff) });
       return li;
     }),
@@ -142,18 +153,19 @@ const makeBabbleLi = (): BabbleLi => {
     babbleSpan,
     louds,
     byspellsUl,
+    babbles,
   };
 };
 
-const makeLoudsDiv = (babble: Babble): LoudsDiv => {
+const makeLoudsDiv = (babbles: Babbles): LoudsDiv => {
   const element = makeHtmlElement("div", { classes: ["loud"] });
   const deepSpan = makeHtmlElement("span", {
     classes: ["deep"],
-    innerHTML: babble,
+    innerHTML: babbles.deep,
   });
   const shoalSpan = makeHtmlElement("span", {
     classes: ["shoal"],
-    innerHTML: shoal(babble),
+    innerHTML: babbles.shoal,
   });
   element.append(deepSpan, shoalSpan);
 
@@ -173,7 +185,7 @@ const updateShapes = (worldDiv: WorldDiv) => {
 
 const updateBabbles = (worldDiv: WorldDiv) => {
   const top = makeBabbleLi();
-  const bottom = makeBabbleLi();
+  const bottom = makeBabbleLi(top.babbles);
 
   worldDiv.babbles.top = top;
   worldDiv.babbles.bottom = bottom;
@@ -281,12 +293,6 @@ const besleep = <E extends Elementful & Wakesome>(wakesome: E): E => {
   wakesome.element.classList.add("asleep");
   return wakesome;
 };
-
-type ShapeDiv = Elementful<"div"> &
-  Wakesome & {
-    nameSpan: HTMLSpanElement;
-    shapeSvg: SVGSVGElement;
-  };
 
 const makeShapeDiv = (settings: Partial<WaystringSettings> = {}): ShapeDiv => {
   const element = makeHtmlElement("div");

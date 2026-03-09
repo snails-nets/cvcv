@@ -1,7 +1,7 @@
 import { expectTypeOf } from "vitest";
-import { type Staff, Wordbook, type Byword } from "./loud";
-import { isUppercase, type Alphabetic } from "./type/string";
-import type { Write, Assert } from "./type/type";
+import { type Staff } from "./loud";
+import { isUppercase, type Alphabetic } from "../type/string";
+import type { Write, Assert } from "../type/type";
 
 type Byspell<S extends Staff> =
   `/${S}/ as in "${OutsideEm<Write<typeof Wordbook>[S][0]>}"`;
@@ -51,6 +51,45 @@ type OutsideEm<S extends string> = S extends `${infer F}${infer R}`
     ? `<em>${F}${InsideEm<R>}`
     : `${Uppercase<F>}${OutsideEm<R>}`
   : S;
+
+export const Wordbook = {
+  p: ["Pea", "Paw"],
+  b: ["Boo", "Bay"],
+  f: ["Foe", "Fee"],
+  v: ["Vee", "Vow"],
+  m: ["May", "Moo"],
+  w: ["Way", "Woe"],
+  t: ["Tea", "Tow"],
+  d: ["Day", "Doe"],
+  s: ["See", "Saw"],
+  z: ["Zoo", "Zap"],
+  θ: ["THin", "THaw"],
+  ð: ["THee", "THough"],
+  n: ["Now", "Neigh"],
+  l: ["Lay", "Low"],
+  r: ["Ray", "Row"],
+  ʧ: ["CHew", "CHow"],
+  ʤ: ["Jay", "Joe"],
+  ʃ: ["SHoe", "SHow"],
+  ʒ: ["viSIon", "garaGE"],
+  j: ["Yam", "You"],
+  k: ["Key", "Caw"],
+  g: ["Goo", "Gall"],
+  h: ["Hat", "Hooves"],
+  i: ["tEA", "crEEp"],
+  ɪ: ["bIt", "shIp"],
+  ʊ: ["fOOt", "pUt"],
+  u: ["tOO", "lOOp"],
+  e: ["dAY", "tApe"],
+  ɛ: ["bEt", "stEp"],
+  ə: ["UttEr", "cUp"],
+  ɔ: ["dOOr", "wOre"],
+  o: ["dOE", "sOAp"],
+  æ: ["dAb", "bAck"],
+  ɑ: ["pAW", "stOp"],
+} as const;
+
+export type Byword = (typeof Wordbook)[keyof typeof Wordbook][number];
 
 expectTypeOf<Byspell<"p">>().toEqualTypeOf<`/p/ as in "<em>P</em>EA"`>();
 expectTypeOf<Byspell<"i">>().toEqualTypeOf<`/i/ as in "T<em>EA</em>"`>();

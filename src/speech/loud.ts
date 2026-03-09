@@ -1,5 +1,7 @@
 import { expectTypeOf } from "vitest";
-import type { Split } from "./type/string";
+import type { Split } from "../type/string";
+
+export type Staffkind = "deep" | "shoal" | "book";
 
 export const Loud = {
   bearing: "iɪʊueɛəɔoæɑ",
@@ -95,7 +97,7 @@ export const Shoal = {
   ɑ: "ɑ",
 } as const;
 
-type Book<S extends string> = S extends `${infer F}${infer R}`
+export type Book<S extends string> = S extends `${infer F}${infer R}`
   ? F extends Staff
     ? `${(typeof Book)[F]}${Book<R>}`
     : `${F}${Book<R>}`
@@ -111,7 +113,7 @@ export const book = <S extends string>(s: S) => {
   return staffs.join("") as Book<S>;
 };
 
-type Shoal<S extends string> = S extends `${infer F}${infer R}`
+export type Shoal<S extends string> = S extends `${infer F}${infer R}`
   ? F extends Staff
     ? `${(typeof Shoal)[F]}${Shoal<R>}`
     : `${F}${Shoal<R>}`
@@ -173,45 +175,6 @@ export type Mark = {
   chokelike: Chokelike;
   bearlike: Bearlike;
 };
-
-export const Wordbook = {
-  p: ["Pea", "Paw"],
-  b: ["Boo", "Bay"],
-  f: ["Foe", "Fee"],
-  v: ["Vee", "Vow"],
-  m: ["May", "Moo"],
-  w: ["Way", "Woe"],
-  t: ["Tea", "Tow"],
-  d: ["Day", "Doe"],
-  s: ["See", "Saw"],
-  z: ["Zoo", "Zap"],
-  θ: ["THin", "THaw"],
-  ð: ["THee", "THough"],
-  n: ["Now", "Neigh"],
-  l: ["Lay", "Low"],
-  r: ["Ray", "Row"],
-  ʧ: ["CHew", "CHow"],
-  ʤ: ["Jay", "Joe"],
-  ʃ: ["SHoe", "SHow"],
-  ʒ: ["viSIon", "garaGE"],
-  j: ["Yam", "You"],
-  k: ["Key", "Caw"],
-  g: ["Goo", "Gall"],
-  h: ["Hat", "Hooves"],
-  i: ["tEA", "crEEp"],
-  ɪ: ["bIt", "shIp"],
-  ʊ: ["fOOt", "pUt"],
-  u: ["tOO", "lOOp"],
-  e: ["dAY", "tApe"],
-  ɛ: ["bEt", "stEp"],
-  ə: ["UttEr", "cUp"],
-  ɔ: ["dOOr", "wOre"],
-  o: ["dOE", "sOAp"],
-  æ: ["dAb", "bAck"],
-  ɑ: ["pAW", "stOp"],
-} as const;
-
-export type Byword = (typeof Wordbook)[keyof typeof Wordbook][number];
 
 expectTypeOf<Exclude<Lip, Smooth | Spread | Staved>>().toEqualTypeOf<"p">();
 expectTypeOf<Exclude<Lip & Staved, Smooth | Spread>>().toEqualTypeOf<"b">();
