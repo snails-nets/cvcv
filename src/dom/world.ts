@@ -8,7 +8,12 @@ type WorldDiv = Elementful<"div"> & {
   shapes: ShapesDiv;
   buttons: ButtonsUl;
   babbles: BabblesUl;
-  isYoked: boolean;
+  yoke: Maybe<Yoke>;
+};
+
+type Yoke = {
+  smooth: Babbles;
+  sharp: Babbles;
 };
 
 type ShapesDiv = Elementful<"div"> & {
@@ -54,7 +59,7 @@ export const become = (): WorldDiv => {
 
   element.append(shapes.element, buttons.element, babbles.element);
 
-  const worldDiv = { element, shapes, buttons, babbles, isYoked: false };
+  const worldDiv = { element, shapes, buttons, babbles, yoke: undefined };
 
   worldDiv.buttons.resetLi.onclick = () => unset(worldDiv);
   worldDiv.buttons.submitLi.onclick = () => send(worldDiv);
@@ -72,11 +77,11 @@ const unset = (worldDiv: WorldDiv) => {
   besleep(worldDiv.babbles.bottom);
   worldDiv.shapes.left.nameSpan.innerHTML = "";
   worldDiv.shapes.right.nameSpan.innerHTML = " ";
-  worldDiv.isYoked = false;
+  worldDiv.yoke = undefined;
 };
 
 const send = (worldDiv: WorldDiv) => {
-  if (worldDiv.isYoked) {
+  if (worldDiv.yoke) {
     wherve(worldDiv);
   }
 };
@@ -217,7 +222,7 @@ const addListener = <E extends Elementful & Wakesome>(
   wakesome.element.classList.add("asleep");
 
   wakesome.element.addEventListener("click", () => {
-    if (worldDiv.isYoked) {
+    if (worldDiv.yoke) {
       unset(worldDiv);
       awaken(wakesome, []);
     } else if (wakesome.wakefulness === "awake") {
@@ -235,12 +240,21 @@ const addListener = <E extends Elementful & Wakesome>(
         );
         if (awakeBabbles.length === 1) {
           if (asleepShapes.length === 1 && asleepBabbles.length === 1) {
-            worldDiv.isYoked = true;
-
             const awakeShape = awakeShapes[0];
             const awakeBabble = awakeBabbles[0];
             const asleepShape = asleepShapes[0];
             const asleepBabble = asleepBabbles[0];
+
+            worldDiv.yoke =
+              awakeShape === worldDiv.shapes.left
+                ? {
+                    smooth: awakeBabble.babbles,
+                    sharp: asleepBabble.babbles,
+                  }
+                : {
+                    smooth: asleepBabble.babbles,
+                    sharp: awakeBabble.babbles,
+                  };
 
             awakeShape.nameSpan.innerHTML = awakeBabble.babbleSpan.innerHTML;
             asleepShape.nameSpan.innerHTML = asleepBabble.babbleSpan.innerHTML;
