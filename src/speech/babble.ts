@@ -25,7 +25,7 @@ export const makeBabbles = (forbiddens: Maybe<Breath> = undefined): Babbles => {
   };
 };
 
-type DeepBabble<
+export type DeepBabble<
   Ch extends Mark["chokelike"] = Mark["chokelike"],
   B extends Mark["bearlike"] = Mark["tight"],
 > = Repeat<`${Ch}${B}`, 2>;

@@ -14,6 +14,10 @@ export type Join<T extends List<string>> = T extends [
   ? `${F}${Join<R>}`
   : "";
 
+export const join = <S extends List<string>>(...xs: S) => {
+  return xs.join("") as Assert<Join<S>>;
+};
+
 export const Alphabet = "abcdefghijklmnopqrstuvwxyz" as const;
 export type Alphabetic = Split<typeof Alphabet>;
 

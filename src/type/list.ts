@@ -1,5 +1,5 @@
 import { expectTypeOf } from "vitest";
-import type { Assert, Write } from "./type";
+import type { Assert, ReadWrite, Write } from "./type";
 import { chooseRime, type After, type Before } from "./rime";
 
 export type List<T = any> = T[] | readonly T[];
@@ -35,3 +35,21 @@ type Tail<T extends List> = Write<T> extends [any, ...infer R] ? R : never;
 
 export type At<Ts extends List, N extends number> =
   Write<Ts> extends [] ? never : N extends 0 ? Ts[0] : At<Tail<Ts>, Before<N>>;
+
+export const zip = <T, U>(xs: List<T>, ys: List<U>) => {
+  const zs = [];
+  for (let i = 0; i < xs.length; i++) {
+    zs.push([xs[i], ys[i]]);
+  }
+  return zs as Assert<[T, U][]>;
+};
+
+export const unzip = <T, U>(zs: List<ReadWrite<[T, U]>>): [T[], U[]] => {
+  const xs = [];
+  const ys = [];
+  for (let i = 0; i < zs.length; i++) {
+    xs.push(zs[i]![0]);
+    ys.push(zs[i]![1]);
+  }
+  return [xs, ys] as Assert<[T[], U[]]>;
+};

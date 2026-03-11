@@ -1,6 +1,7 @@
-import { makeBabbles, type Babbles } from "../speech/babble";
+import { makeBabbles, type Babbles, type DeepBabble } from "../speech/babble";
 import { makeByspell } from "../speech/byspell";
-import type { Maybe } from "../type/type";
+import { unzip } from "../type/list";
+import { union, type Assert, type Maybe } from "../type/type";
 import { makeHtmlElement, type Elementful, type Wakesome } from "./dom";
 import { type WaystringSettings, makeShapeSvg } from "./svg";
 
@@ -9,6 +10,12 @@ type WorldDiv = Elementful<"div"> & {
   buttons: ButtonsUl;
   babbles: BabblesUl;
   yoke: Maybe<Yoke>;
+  snailnets: Snailnet[];
+};
+
+type Snailnet = {
+  smooth: DeepBabble;
+  sharp: DeepBabble;
 };
 
 type Yoke = {
@@ -59,7 +66,14 @@ export const become = (): WorldDiv => {
 
   element.append(shapes.element, buttons.element, babbles.element);
 
-  const worldDiv = { element, shapes, buttons, babbles, yoke: undefined };
+  const worldDiv = {
+    element,
+    shapes,
+    buttons,
+    babbles,
+    yoke: undefined,
+    snailnets: [],
+  };
 
   worldDiv.buttons.resetLi.onclick = () => unset(worldDiv);
   worldDiv.buttons.submitLi.onclick = () => send(worldDiv);
@@ -76,17 +90,53 @@ const unset = (worldDiv: WorldDiv) => {
   besleep(worldDiv.babbles.top);
   besleep(worldDiv.babbles.bottom);
   worldDiv.shapes.left.nameSpan.innerHTML = "";
-  worldDiv.shapes.right.nameSpan.innerHTML = " ";
+  worldDiv.shapes.right.nameSpan.innerHTML = "";
   worldDiv.yoke = undefined;
 };
 
 const send = (worldDiv: WorldDiv) => {
+  console.log(worldDiv.yoke)
   if (worldDiv.yoke) {
+    const snailnets: Snailnet[] = JSON.parse(
+      localStorage.getItem("snailnets") ?? "[]",
+    );
+    snailnets.push({
+      smooth: worldDiv.yoke.smooth.deep,
+      sharp: worldDiv.yoke.sharp.deep,
+    });
+    worldDiv.snailnets = snailnets;
+    understand(snailnets);
+    localStorage.setItem("snailnets", JSON.stringify(snailnets));
     wherve(worldDiv);
   }
 };
 
+const understand = (snailnets: Snailnet[]) => {
+  const [smooths, sharps] = unzip(
+    snailnets.flatMap((snailnet) => [
+      [snailnet.smooth[0]!, snailnet.sharp[0]!],
+      [snailnet.smooth[1]!, snailnet.sharp[1]!],
+    ]),
+  );
+  console.log(smooths, sharps);
+  const understandings = {
+    smooth: union(
+      ...Array.from(new Set(smooths)).map((smooth) => ({
+        [smooth]: smooths.filter((sm) => sm === smooth).length / smooths.length,
+      })),
+    ),
+    sharp: union(
+      ...Array.from(new Set(sharps)).map((sharp) => ({
+        [sharp]: sharps.filter((sh) => sh === sharp).length / sharps.length,
+      })),
+    ),
+  };
+
+  console.log(understandings);
+};
+
 export const wherve = (worldDiv: WorldDiv) => {
+  unset(worldDiv);
   updateShapes(worldDiv);
   updateBabbles(worldDiv);
   addListeners(worldDiv);

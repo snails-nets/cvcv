@@ -1,4 +1,5 @@
 import { expectTypeOf } from "vitest";
+import type { Assert } from "./type";
 
 export type Flight<T, N extends number> = N extends any
   ? number extends N
@@ -14,3 +15,26 @@ expectTypeOf<Flight<number, 0>>().toEqualTypeOf<[]>();
 expectTypeOf<Flight<number, 1>>().toEqualTypeOf<[number]>();
 expectTypeOf<Flight<number, 2>>().toEqualTypeOf<[number, number]>();
 expectTypeOf<Flight<number, 3>>().toEqualTypeOf<[number, number, number]>();
+
+type Sameshift<T, L extends Flight<any, any>> = Flight<T, L["length"]>;
+
+export const sameshift = <T, L extends Flight<any, any>>(
+  xs: L,
+  f: (u: L[number]) => T,
+) => {
+  return xs.map(f) as Assert<Sameshift<T, L>>;
+};
+
+const x = sameshift([0, 0, 0, 0] as const, (x) => `${x}` as const);
+const y = sameshift(x, (y) => `${y}${y}` as const);
+
+expectTypeOf(
+  sameshift([0, 0, 0, 0] as const, (x) => `${x}` as const),
+).toEqualTypeOf<["0", "0", "0", "0"]>();
+
+expectTypeOf(
+  sameshift(
+    sameshift([0, 0, 0, 0] as const, (x) => `${x}` as const),
+    (x) => `${x}${x}` as const,
+  ),
+).toEqualTypeOf<["00", "00", "00", "00"]>();
