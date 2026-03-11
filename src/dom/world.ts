@@ -1,7 +1,7 @@
 import { makeBabbles, type Babbles, type DeepBabble } from "../speech/babble";
 import { makeByspell } from "../speech/byspell";
 import { unzip } from "../type/list";
-import { union, type Assert, type Maybe } from "../type/type";
+import { union, type Maybe } from "../type/type";
 import { makeHtmlElement, type Elementful, type Wakesome } from "./dom";
 import { type WaystringSettings, makeShapeSvg } from "./svg";
 
@@ -95,7 +95,7 @@ const unset = (worldDiv: WorldDiv) => {
 };
 
 const send = (worldDiv: WorldDiv) => {
-  console.log(worldDiv.yoke)
+  console.log(worldDiv.yoke);
   if (worldDiv.yoke) {
     const snailnets: Snailnet[] = JSON.parse(
       localStorage.getItem("snailnets") ?? "[]",

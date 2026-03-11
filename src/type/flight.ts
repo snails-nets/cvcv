@@ -25,9 +25,6 @@ export const sameshift = <T, L extends Flight<any, any>>(
   return xs.map(f) as Assert<Sameshift<T, L>>;
 };
 
-const x = sameshift([0, 0, 0, 0] as const, (x) => `${x}` as const);
-const y = sameshift(x, (y) => `${y}${y}` as const);
-
 expectTypeOf(
   sameshift([0, 0, 0, 0] as const, (x) => `${x}` as const),
 ).toEqualTypeOf<["0", "0", "0", "0"]>();
